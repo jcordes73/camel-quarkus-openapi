@@ -4,20 +4,17 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <modelVersion>4.0.0</modelVersion>
    <groupId>com.redhat</groupId>
-   <artifactId>camel-quarkus-openapi</artifactId>
+   <artifactId>camel-quarkus</artifactId>
    <version>1.0-SNAPSHOT</version>
    <packaging>jar</packaging>
    <name>Open API with Camel Quarkus</name>
-   <description>Design first using Open API and Apache Camel Quarkus</description>
+   <description>Code First using Open API and Apache Camel Quarkus</description>
    <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
       <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
       <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
       <quarkus.platform.version>2.7.3.Final</quarkus.platform.version>
-      <jkube.generator.from>openshift/ubi8-openjdk-11:1.3</jkube.generator.from>
-      <jkube.generator.fromMode>istag</jkube.generator.fromMode>
-      <jkube.enricher.jkube-openshift-route.tlsTermination>edge</jkube.enricher.jkube-openshift-route.tlsTermination>
    </properties>
    <dependencyManagement>
      <dependencies>
@@ -52,6 +49,10 @@
        <artifactId>camel-quarkus-rest</artifactId>
      </dependency>
      <dependency>
+      <groupId>org.apache.camel.quarkus</groupId>
+      <artifactId>camel-quarkus-kafka</artifactId>
+    </dependency>
+     <dependency>
        <groupId>org.apache.camel.quarkus</groupId>
        <artifactId>camel-quarkus-platform-http</artifactId>
      </dependency>
@@ -63,6 +64,14 @@
        <groupId>org.apache.camel.quarkus</groupId>
        <artifactId>camel-quarkus-opentracing</artifactId>
      </dependency>
+     <dependency>
+       <groupId>org.apache.camel.quarkus</groupId>
+       <artifactId>camel-quarkus-management</artifactId>
+     </dependency>
+     <dependency>
+       <groupId>org.apache.camel.quarkus</groupId>
+       <artifactId>camel-quarkus-xml-jaxb</artifactId>
+     </dependency>
    </dependencies>
    <build>
      <plugins>
@@ -73,14 +82,6 @@
          <configuration>
            <source>11</source>
            <target>11</target>
-         </configuration>
-       </plugin>
-       <plugin>
-         <groupId>org.apache.camel</groupId>
-         <artifactId>camel-restdsl-openapi-plugin</artifactId>
-         <version>3.15.0</version>
-         <configuration>
-           <restConfiguration>false</restConfiguration>
          </configuration>
        </plugin>
        <plugin>
@@ -98,99 +99,8 @@
            </execution>
           </executions>
         </plugin>
-       <plugin>
-         <groupId>org.codehaus.mojo</groupId>
-         <artifactId>build-helper-maven-plugin</artifactId>
-         <version>3.3.0</version>
-         <executions>
-           <execution>
-             <id>add-source</id>
-             <phase>generate-sources</phase>
-               <goals>
-                 <goal>add-source</goal>
-               </goals>
-               <configuration>
-                 <sources>
-                   <source>${project.build.directory}/generated-sources/restdsl-openapi/</source>
-                 </sources>
-               </configuration>
-            </execution>
-          </executions>
-        </plugin>
      </plugins>
    </build>
-   <profiles>
-     <profile>
-       <id>native</id>
-       <activation>
-         <property>
-           <name>native</name>
-         </property>
-       </activation>
-       <build>
-         <plugins>
-           <plugin>
-             <artifactId>maven-failsafe-plugin</artifactId>
-             <version>${maven-surefire-plugin.version}</version>
-             <executions>
-               <execution>
-                 <goals>
-                   <goal>integration-test</goal>
-                   <goal>verify</goal>
-                 </goals>
-                 <configuration>
-                   <systemPropertyVariables>
-                     <native.image.path>${project.build.directory}/quarkus-app/quarkus-run</native.image.path>
-                     <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
-                     <maven.home>${maven.home}</maven.home>
-                   </systemPropertyVariables>
-                 </configuration>
-               </execution>
-             </executions>
-           </plugin>
-         </plugins>
-       </build>
-       <properties>
-         <quarkus.package.type>native</quarkus.package.type>
-         <quarkus.native.container-build>true</quarkus.native.container-build>
-         <quarkus.native.builder-image>quay.io/quarkus/ubi-quarkus-mandrel:22.0.0.2-Final-java11</quarkus.native.builder-image>
-       </properties>
-     </profile>
-     <profile>
-       <id>openshift</id>
-       <activation>
-         <property>
-           <name>openshift</name>
-         </property>
-       </activation>
-       <build>
-         <plugins>
-           <plugin>
-             <groupId>org.eclipse.jkube</groupId>
-             <artifactId>openshift-maven-plugin</artifactId>
-             <version>1.7.0</version>
-             <configuration>
-               <enricher>
-                 <excludes>
-                   <exclude>jkube-git</exclude>
-                   <exclude>jkube-project-label</exclude>
-                 </excludes>
-               </enricher>
-             </configuration>
-             <executions>
-               <execution>
-                 <goals>
-                   <goal>resource</goal>
-                   <goal>build</goal>
-                    <goal>apply</goal>
-                 </goals>
-               </execution>
-            </executions>
-           </plugin>
-         </plugins>
-       </build>
-     </profile>
-   </profiles>
    <repositories>
       <repository>
          <id>redhat-ga-repository</id>
